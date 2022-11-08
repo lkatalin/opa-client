@@ -40,6 +40,9 @@ impl From<JsonError> for OpaClientError {
 
 #[async_trait(?Send)]
 pub trait OpenPolicyAgentClient<'a> {
+    /// Implement a new instance of a struct implementing this trait.
+    fn new(bytes: &'a [u8]) -> Self;
+
     /// Query a policy given `input` data and a policy path.
     async fn query<I: Serialize, D: Serialize, O: DeserializeOwned>(
         &mut self,

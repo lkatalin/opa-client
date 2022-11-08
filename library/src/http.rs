@@ -26,18 +26,22 @@ pub struct OpenPolicyAgentHttpClient {
     url: Url,
 }
 
-impl<'a> OpenPolicyAgentHttpClient {
+/*impl<'a> OpenPolicyAgentHttpClient {
     /// Construct a new client given an endpoint.
-    pub fn new(url: Url) -> Self {
+}*/
+
+#[async_trait(?Send)]
+impl<'a> OpenPolicyAgentClient<'a> for OpenPolicyAgentHttpClient {
+    fn new(bytes: &'a [u8]) -> Self {
+        let s = std::str::from_utf8(bytes).expect("could not make string");
+        let url = Url::parse(s).expect("could not parse");
+
         Self {
             client: Client::new(),
             url,
         }
     }
-}
 
-#[async_trait(?Send)]
-impl<'a> OpenPolicyAgentClient<'a> for OpenPolicyAgentHttpClient {
     //impl OpenPolicyAgentHttpClient {
     async fn query<I: Serialize, D: Serialize, O: DeserializeOwned>(
         &mut self,

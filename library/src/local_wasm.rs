@@ -11,12 +11,6 @@ pub struct OpenPolicyAgentWasmClient {
 }
 
 impl<'a> OpenPolicyAgentWasmClient {
-    pub fn new(wasm: &'a [u8]) -> Self {
-        Self {
-            evaluator: Evaluator::new(wasm, Default::default()).unwrap(),
-        }
-    }
-
     pub fn entrypoints(&mut self) -> Result<HashMap<String, i32>, OpaClientError> {
         self.evaluator
             .entrypoints()
@@ -26,6 +20,12 @@ impl<'a> OpenPolicyAgentWasmClient {
 
 #[async_trait(?Send)]
 impl<'a> OpenPolicyAgentClient<'a> for OpenPolicyAgentWasmClient {
+    fn new(bytes: &'a [u8]) -> Self {
+        Self {
+            evaluator: Evaluator::new(bytes, Default::default()).unwrap(),
+        }
+    }
+
     async fn query<I, D, O>(
         &mut self,
         policy: &'a str,
