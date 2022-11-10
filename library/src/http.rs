@@ -21,27 +21,28 @@ impl From<::reqwest::Error> for OpaClientError {
 
 /// Client to communicate and interact with an OpenPolicyAgent (OPA) server
 /// over HTTP(S).
+#[derive(Clone)]
 pub struct OpenPolicyAgentHttpClient {
     client: Client,
     url: Url,
 }
 
-impl<'a> OpenPolicyAgentHttpClient {
+#[async_trait(?Send)]
+impl OpenPolicyAgentClient for OpenPolicyAgentHttpClient {
     /// Construct a new client given an endpoint.
-    pub fn new(url: Url) -> Self {
-        Self {
+    fn new(bytes: &[u8]) -> Result<Self, OpaClientError> {
+        let url = Url::parse(std::str::from_utf8(bytes)?)?;
+
+        Ok(Self {
             client: Client::new(),
             url,
-        }
+        })
     }
-}
 
-#[async_trait(?Send)]
-impl<'a> OpenPolicyAgentClient<'a> for OpenPolicyAgentHttpClient {
     //impl OpenPolicyAgentHttpClient {
     async fn query<I: Serialize, D: Serialize, O: DeserializeOwned>(
         &mut self,
-        policy: &'a str,
+        policy: &str,
         input: &I,
         _data: &D,
     ) -> Result<Option<O>, OpaClientError> {
